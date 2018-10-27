@@ -7,6 +7,11 @@ using System.Runtime.Serialization.Formatters;
 
 namespace RedisStack
 {
+
+
+    /* swapped out Newtonsoft for NetJSON
+    */
+
     class Program
     {
         static void Main(string[] args)
@@ -18,8 +23,7 @@ namespace RedisStack
 
             List<Person> personsSelection = RedisAdaptor.RetrievePersonObjects(Gender.FEMALE);
 
-            //watch.Stop();
-            //Console.WriteLine(watch.Elapsed);
+         
 
             Console.WriteLine(personsSelection.Count);
             Console.ReadKey();
