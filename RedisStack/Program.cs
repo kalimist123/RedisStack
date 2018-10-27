@@ -1,11 +1,55 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.Serialization.Formatters;
+
+
 
 namespace RedisStack
 {
     class Program
     {
         static void Main(string[] args)
+        {
+            // DefaultRun();
+            //  MakeLots();
+
+            // Stopwatch watch = Stopwatch.StartNew();
+
+            List<Person> personsSelection = RedisAdaptor.RetrievePersonObjects(Gender.FEMALE);
+
+            //watch.Stop();
+            //Console.WriteLine(watch.Elapsed);
+
+            Console.WriteLine(personsSelection.Count);
+            Console.ReadKey();
+
+
+        }
+
+        private static void MakeLots()
+        {
+
+            for (var i = 0; i < 500000; i++)
+            {
+
+                Person person = new Person(Util.GetAnyName(), Gender.FEMALE, Country.USA, DateTime.Now.Date.AddMinutes(1));
+                RedisAdaptor.StorePersonObject(person);
+
+                if (i % 10000 == 0)
+                {
+                    Console.WriteLine(i);
+                }
+
+
+            }
+
+
+        }
+
+
+
+        private static void DefaultRun()
         {
             const int YEAR = 1971;
 
@@ -26,6 +70,7 @@ namespace RedisStack
                         {
                             gender = Gender.MALE;
                         }
+
                         // And the country, let's round-robin between all three:
                         Country country = Country.INDIA;
                         if (day % 3 == 1)
@@ -76,8 +121,8 @@ namespace RedisStack
             {
                 Console.WriteLine(person);
             }
-            Console.ReadKey();
 
+            Console.ReadKey();
         }
     }
 }

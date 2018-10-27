@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Newtonsoft.Json;
 using StackExchange.Redis;
+using NetJSON;
 
 namespace RedisStack
 {
@@ -33,7 +35,7 @@ namespace RedisStack
         {
             // We first JSONize the object so that it's easier to save:
             string personJson = JsonConvert.SerializeObject(person);
-            Console.WriteLine("JSONized new Person object: {0}", personJson);
+            //  Console.WriteLine("JSONized new Person object: {0}", personJson);
 
             // And save it to Redis.
 
@@ -89,15 +91,23 @@ namespace RedisStack
             // First, get the database object:
             IDatabase db = _redis.GetDatabase();
 
+            Stopwatch watch = Stopwatch.StartNew();
             RedisValue[] vals = db.SortedSetRangeByScore(REDIS_DOB_INDEX, fromTicks, toTicks);
+
+            watch.Stop();
+            Console.WriteLine($"Redis Fetch finished:{watch.Elapsed}");
+            watch = Stopwatch.StartNew();
             List<Person> opList = new List<Person>();
             foreach (RedisValue val in vals)
             {
                 string personJson = val.ToString();
-                Person person = JsonConvert.DeserializeObject<Person>(personJson);
+                //   Person person = JsonConvert.DeserializeObject<Person>(personJson);
+                
+                var person = NetJSON.NetJSON.Deserialize<Person>(personJson);
                 opList.Add(person);
             }
-
+            watch.Stop();
+            Console.WriteLine($"List Object Create finished:{watch.Elapsed}");
             return opList;
         }
 
@@ -108,16 +118,24 @@ namespace RedisStack
 
             string keyToUse = gender == Gender.MALE ? REDIS_MALE_INDEX : REDIS_FEMALE_INDEX;
 
+            Stopwatch watch = Stopwatch.StartNew();
             RedisValue[] vals = db.SetMembers(keyToUse);
 
+            watch.Stop();
+            Console.WriteLine($"Redis Fetch finished:{watch.Elapsed}");
+
             List<Person> opList = new List<Person>();
+            watch = Stopwatch.StartNew();
             foreach (RedisValue val in vals)
             {
-                string personJson = val.ToString();
-                Person person = JsonConvert.DeserializeObject<Person>(personJson);
+                //string personJson = val.ToString();
+                //Person person = JsonConvert.DeserializeObject<Person>(personJson);
+                var person = NetJSON.NetJSON.Deserialize<Person>(val.ToString());
                 opList.Add(person);
+                
             }
-
+            watch.Stop();
+            Console.WriteLine($"List Object Create finished:{watch.Elapsed}");
             return opList;
         }
 
@@ -141,8 +159,10 @@ namespace RedisStack
             List<Person> opList = new List<Person>();
             foreach (RedisValue val in vals)
             {
-                string personJson = val.ToString();
-                Person person = JsonConvert.DeserializeObject<Person>(personJson);
+                //string personJson = val.ToString();
+                //Person person = JsonConvert.DeserializeObject<Person>(personJson);
+                var person = NetJSON.NetJSON.Deserialize<Person>(val.ToString());
+                opList.Add(person);
                 opList.Add(person);
             }
 
@@ -168,6 +188,8 @@ namespace RedisStack
             RedisKey[] keys = new RedisKey[] { keyToUseGender, keyToUseCountry };
 
             RedisValue[] vals = db.SetCombine(SetOperation.Intersect, keys);
+
+
 
             List<Person> opList = new List<Person>();
             foreach (RedisValue val in vals)
