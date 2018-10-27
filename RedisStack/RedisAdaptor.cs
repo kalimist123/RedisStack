@@ -100,9 +100,7 @@ namespace RedisStack
             List<Person> opList = new List<Person>();
             foreach (RedisValue val in vals)
             {
-                string personJson = val.ToString();
-                //   Person person = JsonConvert.DeserializeObject<Person>(personJson);
-                
+                string person = val.ToString();    
                 var person = NetJSON.NetJSON.Deserialize<Person>(personJson);
                 opList.Add(person);
             }
