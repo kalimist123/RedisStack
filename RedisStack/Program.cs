@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.Serialization.Formatters;
-
+using StackExchange.Redis;
 
 
 namespace RedisStack
@@ -14,6 +14,7 @@ namespace RedisStack
             // DefaultRun();
             //  MakeLots();
 
+           // RedisAdaptor.MakeLotsMore();
             // Stopwatch watch = Stopwatch.StartNew();
 
             List<Person> personsSelection = RedisAdaptor.RetrievePersonObjects(Gender.FEMALE);
@@ -44,6 +45,8 @@ namespace RedisStack
 
             }
 
+
+          
 
         }
 

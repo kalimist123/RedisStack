@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 using NetJSON;
@@ -28,7 +29,30 @@ namespace RedisStack
         static RedisAdaptor()
         {
             // First, init the connection:
+
+
+
+            //var configurationOptions = new ConfigurationOptions
+            //{
+
+              
+
+            //    EndPoints =
+            //    {
+            //        { REDIS_HOST, 6379 }
+            //    },
+            //    SyncTimeout = 20000,
+            //    ConnectTimeout = 20000,
+              
+            //};
+
+
+
             _redis = ConnectionMultiplexer.Connect(REDIS_HOST);
+
+
+          //  _redis = ConnectionMultiplexer.Connect(configurationOptions);
+
         }
 
         public static void StorePersonObject(Person person)
@@ -80,6 +104,32 @@ namespace RedisStack
             db.SortedSetAdd(REDIS_DOB_INDEX, personJson, dateTicks);
         }
 
+
+
+
+
+        public static void MakeLotsMore()
+        {
+            IDatabase db = _redis.GetDatabase();
+
+            IBatch batch = db.CreateBatch();
+            var list = new List<Task<bool>>();
+            Stopwatch watch = Stopwatch.StartNew();
+            for (var i = 0; i < 500000; i++)
+            {
+
+                Person person = new Person(Util.GetAnyName(), Gender.FEMALE, Country.USA, DateTime.Now.Date.AddMinutes(1));
+
+                var p = NetJSON.NetJSON.Serialize(person);
+                var task = batch.StringSetAsync(REDIS_FEMALE_INDEX, p);
+                list.Add(task);
+            }
+            batch.Execute();
+            Task.WhenAll(list.ToArray());
+            watch.Stop();
+            Console.WriteLine($"Redis Batch finished:{watch.Elapsed}");
+        }
+
         public static List<Person> RetrievePersonObjects(DateTime fromDate, DateTime toDate)
         {
             // First. let's convert the dates to tick values:
@@ -114,8 +164,9 @@ namespace RedisStack
         public static List<Person> RetrievePersonObjects(Gender gender)
         {
             // First, get the database object:
+            
             IDatabase db = _redis.GetDatabase();
-
+            
             string keyToUse = gender == Gender.MALE ? REDIS_MALE_INDEX : REDIS_FEMALE_INDEX;
 
             Stopwatch watch = Stopwatch.StartNew();
@@ -168,6 +219,11 @@ namespace RedisStack
 
             return opList;
         }
+
+
+
+
+
 
         public static List<Person> RetrieveSelection(Gender gender, Country country)
         {
